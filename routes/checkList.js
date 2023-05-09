@@ -3,7 +3,7 @@ var router = express.Router();
 
 const {ChecklistRecipes} = require("../models");
 
-//GET randomized recipe
+//GET all Checklist recipe
 router.get('/', async (req, res) => {
     try{
     const checklistRecipes = await ChecklistRecipes.findAll();
@@ -14,22 +14,26 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/random', async (req, res) => {
-    try{
-        const count = await ChecklistRecipes.count()
+// GET recipes based on particular condition
+router.get('/:condition', async (req, res) => {
 
-        //function to generate a random number between 1 and the number of rows of the Recipe table
-         let randomNum = () =>{
-            let num = 1+Math.floor(Math.random()*(count))
-            return num
-        }
-       
-    const fact = await ChecklistRecipes.findByPk(randomNum())
-    res.json(fact)
+    try {
+        console.log('trying to show all with an condition')
+        console.log(req.params.condition)
+
+        const checklistRecipes = await ChecklistRecipes.findAll({
+            where: {
+                medicalCondition: {
+                    [Op.like]: `%${req.params.condition}%`
+                }
+            }
+        })
+        console.log(checklistRecipes)
+        res.json(checklistRecipes)
     }
-    
-    catch (error){
-        res.status(500).json({ message: "Error retrieving random fact", error });
+
+    catch (error) {
+        res.status(500).json({ message: "Error retrieving recipes for condition", error });
     }
 })
 
